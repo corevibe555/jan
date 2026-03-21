@@ -36,6 +36,7 @@ import { basenameNoExt } from '@/lib/utils'
 import { useAppState } from '@/hooks/useAppState'
 import { useShallow } from 'zustand/shallow'
 import { DialogAddModel } from '@/containers/dialogs/AddModel'
+import { ModelSupportStatus } from '@/containers/ModelSupportStatus'
 
 // as route.threadsDetail
 export const Route = createFileRoute('/settings/providers/$providerName')({
@@ -683,6 +684,17 @@ function ProviderDetail() {
                             >
                               {getModelDisplayName(model)}
                             </h1>
+                            {provider.provider === 'llamacpp' && (
+                              <ModelSupportStatus
+                                modelId={model.id}
+                                provider={provider.provider}
+                                contextSize={
+                                  (model.settings?.ctx_len?.controller_props
+                                    ?.value as number) ?? 8192
+                                }
+                                className="shrink-0"
+                              />
+                            )}
                             <Capabilities capabilities={capabilities} />
                           </div>
                         }

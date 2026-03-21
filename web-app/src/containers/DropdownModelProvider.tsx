@@ -15,7 +15,7 @@ import { route } from '@/constants/routes'
 import { useThreads } from '@/hooks/useThreads'
 import { ModelSetting } from '@/containers/ModelSetting'
 import ProvidersAvatar from '@/containers/ProvidersAvatar'
-import { ModelSupportStatus } from '@/containers/ModelSupportStatus'
+import { ModelLoadStopButton } from '@/containers/ModelLoadStopButton'
 import { Fzf } from 'fzf'
 import { localStorageKey } from '@/constants/localStorage'
 import { useTranslation } from '@/i18n/react-i18next-compat'
@@ -96,14 +96,6 @@ const DropdownModelProvider = memo(function DropdownModelProvider({
     },
     [providers]
   )
-
-  // Helper function to get context size from model settings
-  const getContextSize = useCallback((): number => {
-    if (!selectedModel?.settings?.ctx_len?.controller_props?.value) {
-      return 8192 // Default context size
-    }
-    return selectedModel.settings.ctx_len.controller_props.value as number
-  }, [selectedModel?.settings?.ctx_len?.controller_props?.value])
 
   // Function to check if a llamacpp model has vision capabilities and update model capabilities
   const checkAndUpdateModelVisionCapability = useCallback(
@@ -533,11 +525,10 @@ const DropdownModelProvider = memo(function DropdownModelProvider({
                 />
               </div>
             )}
-          <ModelSupportStatus
+          <ModelLoadStopButton
             modelId={selectedModel?.id}
-            provider={selectedProvider}
-            contextSize={getContextSize()}
-            className="ml-0.5 shrink-0"
+            providerName={selectedProvider}
+            className="ml-0.5"
           />
         </div>
         </PopoverTrigger>

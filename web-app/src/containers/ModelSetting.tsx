@@ -16,6 +16,8 @@ import { useServiceHub } from '@/hooks/useServiceHub'
 import { cn, getModelDisplayName } from '@/lib/utils'
 import { useTranslation } from '@/i18n/react-i18next-compat'
 import { useAppState } from '@/hooks/useAppState'
+import { ModelSupportStatus } from '@/containers/ModelSupportStatus'
+import { useMemo } from 'react'
 
 type ModelSettingProps = {
   provider: ProviderObject
@@ -30,6 +32,11 @@ export function ModelSetting({
   const { t } = useTranslation()
   const serviceHub = useServiceHub()
   const setActiveModels = useAppState((state) => state.setActiveModels)
+
+  const contextSize = useMemo(() => {
+    const v = model.settings?.ctx_len?.controller_props?.value
+    return typeof v === 'number' ? v : 8192
+  }, [model.settings?.ctx_len?.controller_props?.value])
 
   // Create a debounced version of stopModel that waits 500ms after the last call
   const debouncedStopModel = debounce((modelId: string) => {
@@ -122,6 +129,15 @@ export function ModelSetting({
           <SheetDescription className='text-xs leading-normal'>
             {t('common:modelSettings.description')}
           </SheetDescription>
+          {provider.provider === 'llamacpp' && (
+            <div className="flex items-center gap-2 pt-2">
+              <ModelSupportStatus
+                modelId={model.id}
+                provider={provider.provider}
+                contextSize={contextSize}
+              />
+            </div>
+          )}
         </SheetHeader>
 
         <div className="px-4 space-y-8 pb-4">

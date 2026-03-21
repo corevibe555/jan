@@ -104,8 +104,8 @@ vi.mock('../ModelSetting', () => ({
   ModelSetting: () => <div data-testid="model-setting" />,
 }))
 
-vi.mock('../ModelSupportStatus', () => ({
-  ModelSupportStatus: () => <div data-testid="model-support-status" />,
+vi.mock('../ModelLoadStopButton', () => ({
+  ModelLoadStopButton: () => <div data-testid="model-load-stop-button" />,
 }))
 
 describe('DropdownModelProvider - Display Name Integration', () => {
