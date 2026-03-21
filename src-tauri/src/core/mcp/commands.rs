@@ -42,6 +42,13 @@ pub async fn deactivate_mcp_server<R: Runtime>(
 ) -> Result<(), String> {
     log::info!("Deactivating MCP server: {name}");
 
+    {
+        let mut tasks = state.mcp_monitoring_tasks.lock().await;
+        if let Some(handle) = tasks.remove(&name) {
+            handle.abort();
+        }
+    }
+
     // Get port from config before removing (for lock file cleanup later)
     let bridge_port = if name == "Jan Browser MCP" {
         let active_servers = state.mcp_active_servers.lock().await;
