@@ -1655,6 +1655,21 @@ export default class llamacpp_extension extends AIEngine {
     // Migrate old env vars
     if (typeof cfg.fit === 'string') cfg.fit = true
 
+    // Fallback to CPU when VRAM is insufficient for the model
+    if (backend.includes('cuda') || backend.includes('vulkan')) {
+      try {
+        const support = await isModelSupported(modelPath, cfg.ctx_size)
+        if (support === 'RED' || support === 'YELLOW') {
+          logger.warn(
+            `Model support status is ${support}. Setting n_gpu_layers=0 for CPU-only inference.`
+          )
+          cfg.n_gpu_layers = 0
+        }
+      } catch (e) {
+        logger.warn(`Failed to check VRAM for model fit, proceeding with default settings: ${e}`)
+      }
+    }
+
     logger.info(
       'Calling Tauri command load_llama_model with config:',
       JSON.stringify(cfg)
