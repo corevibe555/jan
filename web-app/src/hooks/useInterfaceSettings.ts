@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { localStorageKey } from '@/constants/localStorage'
 import { useTheme } from './useTheme'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 export type FontSize = '14px' | '15px' | '16px' | '18px' | '20px'
 
@@ -102,14 +103,16 @@ const applyAccentColorToDOM = (colorValue: string, isDark: boolean) => {
 interface InterfaceSettingsState {
   fontSize: FontSize
   accentColor: AccentColorValue
+  nativeTitleBar: boolean
   setFontSize: (size: FontSize) => void
   setAccentColor: (color: AccentColorValue) => void
+  setNativeTitleBar: (enabled: boolean) => void
   resetInterface: () => void
 }
 
 type InterfaceSettingsPersistedSlice = Omit<
   InterfaceSettingsState,
-  'resetInterface' | 'setFontSize' | 'setAccentColor'
+  'resetInterface' | 'setFontSize' | 'setAccentColor' | 'setNativeTitleBar'
 >
 
 export const fontSizeOptions = [
@@ -126,6 +129,7 @@ const createDefaultInterfaceValues = (): InterfaceSettingsPersistedSlice => {
   return {
     fontSize: defaultFontSize,
     accentColor: DEFAULT_ACCENT_COLOR,
+    nativeTitleBar: false,
   }
 }
 
@@ -155,6 +159,7 @@ export const useInterfaceSettings = create<InterfaceSettingsState>()(
           set({
             fontSize: defaultFontSize,
             accentColor: DEFAULT_ACCENT_COLOR,
+            nativeTitleBar: false,
           })
         },
 
@@ -165,6 +170,13 @@ export const useInterfaceSettings = create<InterfaceSettingsState>()(
           const { isDark } = useTheme.getState()
           applyAccentColorToDOM(color, isDark)
           set({ accentColor: color })
+        },
+
+        setNativeTitleBar: (enabled: boolean) => {
+          if (IS_TAURI && IS_LINUX) {
+            void getCurrentWebviewWindow().setDecorations(enabled)
+          }
+          set({ nativeTitleBar: enabled })
         },
 
         setFontSize: (size: FontSize) => {
@@ -191,6 +203,11 @@ export const useInterfaceSettings = create<InterfaceSettingsState>()(
             '--font-size-base',
             state.fontSize
           )
+
+          // Apply native title bar preference on Linux
+          if (IS_TAURI && IS_LINUX && state.nativeTitleBar) {
+            void getCurrentWebviewWindow().setDecorations(true)
+          }
 
           // Get the current theme state
           const { isDark } = useTheme.getState()

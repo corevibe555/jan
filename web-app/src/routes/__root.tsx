@@ -17,6 +17,7 @@ import { useJanModelPrompt } from '@/hooks/useJanModelPrompt'
 import { PromptJanModel } from '@/containers/PromptJanModel'
 import { AnalyticProvider } from '@/providers/AnalyticProvider'
 import { useLeftPanel } from '@/hooks/useLeftPanel'
+import { useInterfaceSettings } from '@/hooks/useInterfaceSettings'
 import ToolApproval from '@/containers/dialogs/ToolApproval'
 import { TranslationProvider } from '@/i18n/TranslationContext'
 import OutOfContextPromiseModal from '@/containers/dialogs/OutOfContextDialog'
@@ -44,6 +45,7 @@ const AppLayout = () => {
     width: sidebarWidth,
     setLeftPanelWidth,
   } = useLeftPanel()
+  const { nativeTitleBar } = useInterfaceSettings()
 
   return (
     <div className="bg-neutral-50 dark:bg-background size-full relative">
@@ -56,7 +58,7 @@ const AppLayout = () => {
         <AnalyticProvider />
         <KeyboardShortcutsProvider />
         {/* Fake absolute panel top to enable window drag */}
-        {IS_WINDOWS && <WindowControls />}
+        {(IS_WINDOWS || (IS_LINUX && !nativeTitleBar)) && <WindowControls />}
         {IS_TAURI && (
           <div
             className="fixed w-full h-12 z-20 top-0 cursor-grab active:cursor-grabbing"

@@ -9,6 +9,7 @@ import { FontSizeSwitcher } from '@/containers/FontSizeSwitcher'
 import { AccentColorPicker } from '@/containers/AccentColorPicker'
 import { useInterfaceSettings } from '@/hooks/useInterfaceSettings'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +19,7 @@ export const Route = createFileRoute(route.settings.interface as any)({
 
 function InterfaceSettings() {
   const { t } = useTranslation()
-  const { resetInterface } = useInterfaceSettings()
+  const { nativeTitleBar, setNativeTitleBar, resetInterface } = useInterfaceSettings()
 
   return (
     <div className="flex flex-col h-svh w-full">
@@ -49,6 +50,28 @@ function InterfaceSettings() {
                 className="flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-y-2"
                 actions={<AccentColorPicker />}
               />
+              {IS_LINUX && (
+                <CardItem
+                  title="Native title bar"
+                  description="Use the system native title bar instead of the custom one. Enables window snapping on supported desktops."
+                  actions={
+                    <Switch
+                      checked={nativeTitleBar}
+                      onCheckedChange={(enabled) => {
+                        setNativeTitleBar(enabled)
+                        toast.info('Restart required', {
+                          id: 'native-title-bar',
+                          description: 'Please restart Jan for the title bar change to take effect.',
+                          action: {
+                            label: 'Restart now',
+                            onClick: () => window.core?.api?.relaunch(),
+                          },
+                        })
+                      }}
+                    />
+                  }
+                />
+              )}
               <CardItem
                 title={t('settings:interface.resetToDefault')}
                 description={t('settings:interface.resetToDefaultDesc')}
